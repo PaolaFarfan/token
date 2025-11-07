@@ -1,4 +1,4 @@
-const API_URL = 'api/';
+const API_URL = 'controllers/';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar si ya está autenticado
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function checkAuth() {
     try {
-        const response = await fetch(API_URL + 'auth.php?action=check');
+    const response = await fetch(API_URL + 'AuthController.php?action=check');
         const result = await response.json();
         
         if (result.authenticated) {
@@ -29,7 +29,7 @@ async function login() {
     const password = document.getElementById('password').value;
     
     try {
-        const response = await fetch(API_URL + 'auth.php?action=login', {
+    const response = await fetch(API_URL + 'AuthController.php?action=login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

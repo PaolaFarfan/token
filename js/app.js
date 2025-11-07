@@ -1,4 +1,4 @@
-const API_URL = 'api/';
+const API_URL = 'controllers/';
 
 document.addEventListener('DOMContentLoaded', function() {
     cargarDashboard();
@@ -60,7 +60,7 @@ async function cargarVista(vista) {
 
 async function cargarGestionTokens() {
     try {
-        const response = await fetch(API_URL + 'tokens.php?action=getAll');
+    const response = await fetch(API_URL + 'TokenController.php?action=getAll');
         const result = await response.json();
         
         let tokensHTML = `
@@ -117,7 +117,7 @@ async function cargarGestionTokens() {
 
 async function openEditModal(id) {
     try {
-        const response = await fetch(API_URL + 'tokens.php?action=get&id=' + id);
+    const response = await fetch(API_URL + 'TokenController.php?action=get&id=' + id);
         const result = await response.json();
         
         if (result.success) {
@@ -145,7 +145,7 @@ async function updateToken() {
     };
 
     try {
-        const response = await fetch(API_URL + 'tokens.php?action=update', {
+    const response = await fetch(API_URL + 'TokenController.php?action=update', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ async function updateToken() {
 
 async function logout() {
     try {
-        const response = await fetch(API_URL + 'auth.php?action=logout');
+    const response = await fetch(API_URL + 'AuthController.php?action=logout');
         const result = await response.json();
         
         if (result.success) {
@@ -184,7 +184,7 @@ async function logout() {
 
 async function cargarEstadisticas() {
     try {
-        const response = await fetch(API_URL + 'tokens.php?action=getAll');
+    const response = await fetch(API_URL + 'TokenController.php?action=getAll');
         const result = await response.json();
         
         if (result.success) {
