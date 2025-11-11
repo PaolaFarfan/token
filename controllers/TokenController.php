@@ -1,12 +1,4 @@
 <?php
-// Limpiar cualquier salida previa
-if (ob_get_level()) {
-    ob_clean();
-}
-
-// Iniciar buffer de salida
-ob_start();
-
 require_once "../config/config.php";
 require_once "../models/TokenModel.php";
 
@@ -201,6 +193,5 @@ switch($action) {
         break;
 }
 
-// Limpiar buffer
-ob_end_clean();
+// (Sin buffering) Fin del enrutador
 ?>

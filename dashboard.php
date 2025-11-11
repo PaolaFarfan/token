@@ -217,9 +217,30 @@ if (!Config::isAuthenticated()) {
             cargarDashboard();
         });
 
+        // Reutilizable: mostrar alertas dentro del contenido principal
+        function showAlert(message, type = 'info', timeout = 5000) {
+            const container = document.getElementById('content');
+            const id = 'alert-' + Date.now();
+            const html = `
+                <div id="${id}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            // Insertar al inicio del contenido
+            container.insertAdjacentHTML('afterbegin', html);
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(el);
+                    bsAlert.close();
+                }
+            }, timeout);
+        }
+
         async function cargarDashboard() {
             try {
-                const response = await fetch('controllers/TokenController.php?action=stats');
+                const response = await fetch('controllers/TokenController.php?action=stats', { credentials: 'same-origin' });
                 const result = await response.json();
                 
                 let stats = { total: 0, activos: 0, inactivos: 0 };
@@ -272,7 +293,7 @@ if (!Config::isAuthenticated()) {
 
         async function cargarGestionTokens() {
             try {
-                const response = await fetch('controllers/TokenController.php?action=getAll');
+                const response = await fetch('controllers/TokenController.php?action=getAll', { credentials: 'same-origin' });
                 const result = await response.json();
                 
                 let html = `
@@ -356,6 +377,7 @@ if (!Config::isAuthenticated()) {
             try {
                 const response = await fetch('controllers/TokenController.php?action=create', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id_client_api, token })
                 });
@@ -379,7 +401,7 @@ if (!Config::isAuthenticated()) {
 
         async function editarToken(id) {
             try {
-                const response = await fetch(`controllers/TokenController.php?action=get&id=${id}`);
+                const response = await fetch(`controllers/TokenController.php?action=get&id=${id}`, { credentials: 'same-origin' });
                 const result = await response.json();
 
                 if (result.success) {
@@ -408,6 +430,7 @@ if (!Config::isAuthenticated()) {
             try {
                 const response = await fetch('controllers/TokenController.php?action=update', {
                     method: 'PUT',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(tokenData)
                 });
@@ -438,7 +461,8 @@ if (!Config::isAuthenticated()) {
         async function eliminarToken(id) {
             try {
                 const response = await fetch(`controllers/TokenController.php?action=delete&id=${id}`, {
-                    method: 'GET'
+                    method: 'GET',
+                    credentials: 'same-origin'
                 });
 
                 const result = await response.json();
@@ -490,7 +514,7 @@ if (!Config::isAuthenticated()) {
 
         async function logout() {
             try {
-                const response = await fetch('controllers/AuthController.php?action=logout');
+                const response = await fetch('controllers/AuthController.php?action=logout', { credentials: 'same-origin' });
                 const result = await response.json();
                 
                 if (result.success) {
