@@ -107,7 +107,6 @@ require_once "config/config.php";
                         Contraseña: <code>admin123</code>
                     </div>
                 </div>
-                <small class="text-muted">(Las credenciales pueden cambiarse en la base de datos. Estos valores son solo de ejemplo.)</small>
             </div>
         </div>
     </div>
