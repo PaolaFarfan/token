@@ -6,15 +6,19 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Configuración de la base de datos
 define('BD_HOST', 'localhost');
-define('BD_NAME', 'token');
+define('BD_NAME', 'paola_consumer');
 define('BD_USER', 'root');
-define('BD_PASSWORD', 'root');
+define('BD_PASSWORD', '');
 define('BD_CHARSET', 'utf8');
 
 // Configuración de la aplicación
-define('BASE_URL', 'http://localhost:8888/token/');
+define('BASE_URL', 'http://localhost/token/');
 define('APP_NAME', 'Sistema de Gestión de Tokens API');
 define('SESSION_TIMEOUT', 3600); // 1 hora en segundos
+
+// Configuración de API Externa
+// Ajusta el puerto según tu configuración de XAMPP (80 o 8888)
+define('API_EMPRESAS_URL', 'http://localhost/api_empresas/empresas.php');
 
 class Config {
     public static function init() {

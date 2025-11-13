@@ -73,19 +73,25 @@ if (!Config::isAuthenticated()) {
                     </div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#" onclick="cargarDashboard(); return false;">
+                            <a class="nav-link" id="nav-dashboard" href="#" onclick="cargarDashboard(); return false;">
                                 <i class="fas fa-tachometer-alt me-2"></i>
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="cargarGestionTokens(); return false;">
+                            <a class="nav-link" id="nav-tokens" href="#" onclick="cargarGestionTokens(); return false;">
                                 <i class="fas fa-key me-2"></i>
                                 Gestión de Tokens
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="cargarPerfil(); return false;">
+                            <a class="nav-link" id="nav-empresas" href="#" onclick="cargarEmpresas(); return false;">
+                                <i class="fas fa-building me-2"></i>
+                                Empresas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="nav-perfil" href="#" onclick="cargarPerfil(); return false;">
                                 <i class="fas fa-user me-2"></i>
                                 Mi Perfil
                             </a>
@@ -212,8 +218,22 @@ if (!Config::isAuthenticated()) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Función para establecer el enlace activo en el sidebar
+        function setActiveNav(navId) {
+            // Remover active de todos los enlaces
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            // Agregar active al enlace seleccionado
+            const activeLink = document.getElementById(navId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
         // Cargar dashboard al iniciar
         document.addEventListener('DOMContentLoaded', function() {
+            setActiveNav('nav-dashboard');
             cargarDashboard();
         });
 
@@ -239,6 +259,7 @@ if (!Config::isAuthenticated()) {
         }
 
         async function cargarDashboard() {
+            setActiveNav('nav-dashboard');
             try {
                 const response = await fetch('controllers/TokenController.php?action=stats', { credentials: 'same-origin' });
                 const result = await response.json();
@@ -292,6 +313,7 @@ if (!Config::isAuthenticated()) {
         }
 
         async function cargarGestionTokens() {
+            setActiveNav('nav-tokens');
             try {
                 const response = await fetch('controllers/TokenController.php?action=getAll', { credentials: 'same-origin' });
                 const result = await response.json();
@@ -478,6 +500,7 @@ if (!Config::isAuthenticated()) {
         }
 
         function cargarPerfil() {
+            setActiveNav('nav-perfil');
             document.getElementById('content').innerHTML = `
                 <div class="row">
                     <div class="col-12"><h2>Mi Perfil</h2></div>
@@ -510,6 +533,212 @@ if (!Config::isAuthenticated()) {
                     Esta funcionalidad estará disponible pronto. Solo para administradores.
                 </div>
             `;
+        }
+
+        async function cargarEmpresas() {
+            setActiveNav('nav-empresas');
+            try {
+                // Mostrar loading
+                document.getElementById('content').innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-3">Cargando empresas...</p>
+                    </div>
+                `;
+
+                const response = await fetch('controllers/EmpresaController.php?action=getAll', { credentials: 'same-origin' });
+                const result = await response.json();
+                
+                let html = `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-building me-2"></i>Empresas</h2>
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="text" class="form-control" id="buscarEmpresa" placeholder="Buscar por nombre, RUC, email...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="buscarEmpresas()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" type="button" onclick="cargarEmpresas()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    html += `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Total de empresas: <strong>${result.total}</strong>
+                        </div>
+                        <div class="row">
+                    `;
+                    
+                    result.data.forEach(empresa => {
+                        html += `
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card token-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                ${empresa.nombre || 'Sin nombre'}
+                                            </h5>
+                                        </div>
+                                        <p class="card-text">
+                                            <strong><i class="fas fa-id-card me-2 text-muted"></i>RUC:</strong> 
+                                            ${empresa.ruc || 'N/A'}<br>
+                                            <strong><i class="fas fa-map-marker-alt me-2 text-muted"></i>Dirección:</strong> 
+                                            ${empresa.direccion || 'N/A'}<br>
+                                            <strong><i class="fas fa-phone me-2 text-muted"></i>Teléfono:</strong> 
+                                            ${empresa.telefono || 'N/A'}<br>
+                                            <strong><i class="fas fa-envelope me-2 text-muted"></i>Email:</strong> 
+                                            ${empresa.email || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                } else {
+                    html += `
+                        <div class="alert alert-${result.success ? 'info' : 'warning'}">
+                            <i class="fas fa-${result.success ? 'info-circle' : 'exclamation-triangle'} me-2"></i>
+                            ${result.message || 'No hay empresas registradas.'}
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('content').innerHTML = html;
+
+                // Agregar evento Enter en el campo de búsqueda
+                const buscarInput = document.getElementById('buscarEmpresa');
+                if (buscarInput) {
+                    buscarInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            buscarEmpresas();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando empresas:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al cargar empresas. Por favor, intenta nuevamente.
+                    </div>
+                `;
+            }
+        }
+
+        async function buscarEmpresas() {
+            const valor = document.getElementById('buscarEmpresa').value.trim();
+            
+            if (!valor) {
+                cargarEmpresas();
+                return;
+            }
+
+            try {
+                // Mostrar loading
+                document.getElementById('content').innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Buscando...</span>
+                        </div>
+                        <p class="mt-3">Buscando empresas...</p>
+                    </div>
+                `;
+
+                const response = await fetch(`controllers/EmpresaController.php?action=search&campo=nombre&valor=${encodeURIComponent(valor)}`, { 
+                    credentials: 'same-origin' 
+                });
+                const result = await response.json();
+                
+                let html = `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-building me-2"></i>Empresas</h2>
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="text" class="form-control" id="buscarEmpresa" value="${valor}" placeholder="Buscar por nombre, RUC, email...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="buscarEmpresas()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" type="button" onclick="cargarEmpresas()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    html += `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Se encontraron <strong>${result.total}</strong> empresa(s) con el término "${valor}"
+                        </div>
+                        <div class="row">
+                    `;
+                    
+                    result.data.forEach(empresa => {
+                        html += `
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card token-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                ${empresa.nombre || 'Sin nombre'}
+                                            </h5>
+                                        </div>
+                                        <p class="card-text">
+                                            <strong><i class="fas fa-id-card me-2 text-muted"></i>RUC:</strong> 
+                                            ${empresa.ruc || 'N/A'}<br>
+                                            <strong><i class="fas fa-map-marker-alt me-2 text-muted"></i>Dirección:</strong> 
+                                            ${empresa.direccion || 'N/A'}<br>
+                                            <strong><i class="fas fa-phone me-2 text-muted"></i>Teléfono:</strong> 
+                                            ${empresa.telefono || 'N/A'}<br>
+                                            <strong><i class="fas fa-envelope me-2 text-muted"></i>Email:</strong> 
+                                            ${empresa.email || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                } else {
+                    html += `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-search me-2"></i>
+                            No se encontraron empresas con el término "${valor}"
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('content').innerHTML = html;
+
+                // Agregar evento Enter en el campo de búsqueda
+                const buscarInput = document.getElementById('buscarEmpresa');
+                if (buscarInput) {
+                    buscarInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            buscarEmpresas();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error buscando empresas:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al buscar empresas. Por favor, intenta nuevamente.
+                    </div>
+                `;
+            }
         }
 
         async function logout() {
