@@ -6,19 +6,19 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Configuración de la base de datos
 define('BD_HOST', 'localhost');
-define('BD_NAME', 'paola_consumer');
-define('BD_USER', 'root');
-define('BD_PASSWORD', '');
+define('BD_NAME', 'cwefycom_empresa_consumer');
+define('BD_USER', 'cwefycom_empresa_consumer_user');
+define('BD_PASSWORD', '123empresa123@');
 define('BD_CHARSET', 'utf8');
 
 // Configuración de la aplicación
-define('BASE_URL', 'http://localhost/token/');
+define('BASE_URL', 'https://clienteempresas.cwefy.com/');
 define('APP_NAME', 'Sistema de Gestión de Tokens API');
 define('SESSION_TIMEOUT', 3600); // 1 hora en segundos
 
 // Configuración de API Externa
 // Ajusta el puerto según tu configuración de XAMPP (80 o 8888)
-define('API_EMPRESAS_URL', 'http://localhost/api_empresas/empresas.php');
+define('API_EMPRESAS_URL', 'https://empresas.cwefy.com/empresas.php');
 
 class Config {
     public static function init() {
