@@ -84,18 +84,19 @@ if (!Config::isAuthenticated()) {
                     </div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#" onclick="cargarDashboard(); return false;">
+                            <a class="nav-link" id="nav-dashboard" href="#" onclick="cargarDashboard(); return false;">
                                 <i class="fas fa-tachometer-alt me-2"></i>
                                 Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="cargarGestionTokens(); return false;">
+                            <a class="nav-link" id="nav-tokens" href="#" onclick="cargarGestionTokens(); return false;">
                                 <i class="fas fa-key me-2"></i>
                                 Gestión de Tokens
                             </a>
                         </li>
                         <li class="nav-item">
+
                             <a class="nav-link" href="#" onclick="cargarConsultarAPI(); return false;">
                                 <i class="fas fa-exchange-alt me-2"></i>
                                 Consultar API
@@ -103,6 +104,7 @@ if (!Config::isAuthenticated()) {
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" onclick="cargarPerfil(); return false;">
+
                                 <i class="fas fa-user me-2"></i>
                                 Mi Perfil
                             </a>
@@ -229,13 +231,16 @@ if (!Config::isAuthenticated()) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+ HEAD
         // Variables globales para configuración de API
         let apiUrl = 'http://localhost:8888/api_empresas/';
         let apiToken = 'tok_e2356634bb700782b9e4588bb8b6e526';
         let consultaTipo = 'Listar todas las empresas';
 
+
         // Cargar dashboard al iniciar
         document.addEventListener('DOMContentLoaded', function() {
+            setActiveNav('nav-dashboard');
             cargarDashboard();
         });
 
@@ -261,6 +266,7 @@ if (!Config::isAuthenticated()) {
         }
 
         async function cargarDashboard() {
+            setActiveNav('nav-dashboard');
             try {
                 const response = await fetch('controllers/TokenController.php?action=stats', { credentials: 'same-origin' });
                 const result = await response.json();
@@ -314,6 +320,7 @@ if (!Config::isAuthenticated()) {
         }
 
         async function cargarGestionTokens() {
+            setActiveNav('nav-tokens');
             try {
                 const response = await fetch('controllers/TokenController.php?action=getAll', { credentials: 'same-origin' });
                 const result = await response.json();
@@ -571,6 +578,7 @@ if (!Config::isAuthenticated()) {
         }
 
         function cargarPerfil() {
+            setActiveNav('nav-perfil');
             document.getElementById('content').innerHTML = `
                 <div class="row">
                     <div class="col-12"><h2>Mi Perfil</h2></div>
@@ -604,6 +612,7 @@ if (!Config::isAuthenticated()) {
                 </div>
             `;
         }
+
 
         // Funciones para la consulta de API
         function actualizarConfiguracion() {
@@ -700,6 +709,7 @@ if (!Config::isAuthenticated()) {
                 // En una implementación real, aquí verificarías la conexión a la API
                 showAlert('Conexión exitosa a la API', 'success');
             }, 1000);
+
         }
 
         async function logout() {
