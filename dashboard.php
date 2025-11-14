@@ -59,17 +59,6 @@ if (!Config::isAuthenticated()) {
             padding: 2px 5px;
             border-radius: 3px;
         }
-        .api-config-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .btn-api {
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -96,15 +85,13 @@ if (!Config::isAuthenticated()) {
                             </a>
                         </li>
                         <li class="nav-item">
-
-                            <a class="nav-link" href="#" onclick="cargarConsultarAPI(); return false;">
-                                <i class="fas fa-exchange-alt me-2"></i>
-                                Consultar API
+                            <a class="nav-link" id="nav-empresas" href="#" onclick="cargarEmpresas(); return false;">
+                                <i class="fas fa-building me-2"></i>
+                                Empresas
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="cargarPerfil(); return false;">
-
+                            <a class="nav-link" id="nav-perfil" href="#" onclick="cargarPerfil(); return false;">
                                 <i class="fas fa-user me-2"></i>
                                 Mi Perfil
                             </a>
@@ -231,12 +218,18 @@ if (!Config::isAuthenticated()) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
- HEAD
-        // Variables globales para configuración de API
-        let apiUrl = 'http://localhost:8888/api_empresas/';
-        let apiToken = 'tok_e2356634bb700782b9e4588bb8b6e526';
-        let consultaTipo = 'Listar todas las empresas';
-
+        // Función para establecer el enlace activo en el sidebar
+        function setActiveNav(navId) {
+            // Remover active de todos los enlaces
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            // Agregar active al enlace seleccionado
+            const activeLink = document.getElementById(navId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
 
         // Cargar dashboard al iniciar
         document.addEventListener('DOMContentLoaded', function() {
@@ -307,9 +300,9 @@ if (!Config::isAuthenticated()) {
                         </div>
                         <div class="col-md-3">
                             <div class="stats-card text-center">
-                                <i class="fas fa-exchange-alt fa-2x text-info mb-3"></i>
-                                <h3>API Empresas</h3>
-                                <p class="text-muted">Consultar API</p>
+                                <i class="fas fa-user fa-2x text-info mb-3"></i>
+                                <h3><?php echo $_SESSION['nombre']; ?></h3>
+                                <p class="text-muted">Usuario Actual</p>
                             </div>
                         </div>
                     </div>
@@ -377,77 +370,6 @@ if (!Config::isAuthenticated()) {
                 console.error('Error cargando tokens:', error);
                 document.getElementById('content').innerHTML = '<div class="alert alert-danger">Error al cargar tokens</div>';
             }
-        }
-
-        function cargarConsultarAPI() {
-            document.getElementById('content').innerHTML = `
-                <div class="row">
-                   
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="api-config-card">
-                            <h5 class="mb-3">Configuración de la API</h5>
-                            <div class="mb-3">
-                                <label for="apiUrl" class="form-label">URL de la API:</label>
-                                <input type="text" class="form-control" id="apiUrl" value="${apiUrl}" placeholder="Asegúrate de que la URL termine con /">
-                            </div>
-                            <div class="mb-3">
-                                <label for="apiToken" class="form-label">Token de autenticación:</label>
-                                <input type="text" class="form-control" id="apiToken" value="${apiToken}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="consultaTipo" class="form-label">Tipo de consulta:</label>
-                                <select class="form-control" id="consultaTipo">
-                                    <option value="Listar todas las empresas" ${consultaTipo === 'Listar todas las empresas' ? 'selected' : ''}>Listar todas las empresas</option>
-                                    <option value="Buscar por ID" ${consultaTipo === 'Buscar por ID' ? 'selected' : ''}>Buscar por ID</option>
-                                    <option value="Buscar por RUC" ${consultaTipo === 'Buscar por RUC' ? 'selected' : ''}>Buscar por RUC</option>
-                                </select>
-                            </div>
-                            <div class="d-flex flex-wrap">
-                                <button class="btn btn-primary btn-api" onclick="consultarEmpresas()">
-                                    <i class="fas fa-search me-2"></i>Consultar Empresas
-                                </button>
-                                <button class="btn btn-secondary btn-api" onclick="limpiarResultados()">
-                                    <i class="fas fa-broom me-2"></i>Limpiar Resultados
-                                </button>
-                                <button class="btn btn-info btn-api" onclick="probarConexion()">
-                                    <i class="fas fa-plug me-2"></i>Probar Conexión
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="api-config-card">
-                            <h5 class="mb-3">Resultados de la Consulta</h5>
-                            <div id="resultadosApi" class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>Nro</th>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>RUC</th>
-                                            <th>Dirección</th>
-                                            <th>Teléfono</th>
-                                            <th>Email</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tablaEmpresas">
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">
-                                                Realice una consulta para ver los resultados
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
         }
 
         function mostrarModalNuevoToken() {
@@ -602,7 +524,7 @@ if (!Config::isAuthenticated()) {
         function cargarUsuarios() {
             document.getElementById('content').innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Gestion de Usuarios</h2>
+                    <h2>Gestión de Usuarios</h2>
                     <button class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Nuevo Usuario
                     </button>
@@ -613,103 +535,210 @@ if (!Config::isAuthenticated()) {
             `;
         }
 
-
-        // Funciones para la consulta de API
-        function actualizarConfiguracion() {
-            apiUrl = document.getElementById('apiUrl').value;
-            apiToken = document.getElementById('apiToken').value;
-            consultaTipo = document.getElementById('consultaTipo').value;
-        }
-
-        async function consultarEmpresas() {
-            actualizarConfiguracion();
-            
-            if (!apiUrl || !apiToken) {
-                showAlert('Por favor, completa la URL y el token de la API', 'warning');
-                return;
-            }
-            
+        async function cargarEmpresas() {
+            setActiveNav('nav-empresas');
             try {
-                showAlert('Consultando empresas...', 'info');
+                // Mostrar loading
+                document.getElementById('content').innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-3">Cargando empresas...</p>
+                    </div>
+                `;
+
+                const response = await fetch('controllers/EmpresaController.php?action=getAll', { credentials: 'same-origin' });
+                const result = await response.json();
                 
-                // Simulación de consulta a la API
-                // En una implementación real, aquí harías la llamada a la API
-                setTimeout(() => {
-                    // Datos de ejemplo para simular la respuesta
-                    const empresas = [
-                        { id: 1, nombre: 'Empresa Ejemplo 1', ruc: '20100066601', direccion: 'Av. Ejemplo 123', telefono: '987654321', email: 'contacto@empresa1.com' },
-                        { id: 2, nombre: 'Empresa Ejemplo 2', ruc: '20100066602', direccion: 'Av. Demo 456', telefono: '987654322', email: 'info@empresa2.com' },
-                        { id: 3, nombre: 'Empresa Ejemplo 3', ruc: '20100066603', direccion: 'Calle Test 789', telefono: '987654323', email: 'ventas@empresa3.com' }
-                    ];
+                let html = `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-building me-2"></i>Empresas</h2>
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="text" class="form-control" id="buscarEmpresa" placeholder="Buscar por nombre, RUC, email...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="buscarEmpresas()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" type="button" onclick="cargarEmpresas()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    html += `
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Total de empresas: <strong>${result.total}</strong>
+                        </div>
+                        <div class="row">
+                    `;
                     
-                    mostrarResultados(empresas);
-                    showAlert('Consulta completada correctamente', 'success');
-                }, 1500);
+                    result.data.forEach(empresa => {
+                        html += `
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card token-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                ${empresa.nombre || 'Sin nombre'}
+                                            </h5>
+                                        </div>
+                                        <p class="card-text">
+                                            <strong><i class="fas fa-id-card me-2 text-muted"></i>RUC:</strong> 
+                                            ${empresa.ruc || 'N/A'}<br>
+                                            <strong><i class="fas fa-map-marker-alt me-2 text-muted"></i>Dirección:</strong> 
+                                            ${empresa.direccion || 'N/A'}<br>
+                                            <strong><i class="fas fa-phone me-2 text-muted"></i>Teléfono:</strong> 
+                                            ${empresa.telefono || 'N/A'}<br>
+                                            <strong><i class="fas fa-envelope me-2 text-muted"></i>Email:</strong> 
+                                            ${empresa.email || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                } else {
+                    html += `
+                        <div class="alert alert-${result.success ? 'info' : 'warning'}">
+                            <i class="fas fa-${result.success ? 'info-circle' : 'exclamation-triangle'} me-2"></i>
+                            ${result.message || 'No hay empresas registradas.'}
+                        </div>
+                    `;
+                }
                 
+                document.getElementById('content').innerHTML = html;
+
+                // Agregar evento Enter en el campo de búsqueda
+                const buscarInput = document.getElementById('buscarEmpresa');
+                if (buscarInput) {
+                    buscarInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            buscarEmpresas();
+                        }
+                    });
+                }
             } catch (error) {
-                console.error('Error consultando API:', error);
-                showAlert('Error al consultar la API: ' + error.message, 'danger');
+                console.error('Error cargando empresas:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al cargar empresas. Por favor, intenta nuevamente.
+                    </div>
+                `;
             }
         }
 
-        function mostrarResultados(empresas) {
-            const tabla = document.getElementById('tablaEmpresas');
+        async function buscarEmpresas() {
+            const valor = document.getElementById('buscarEmpresa').value.trim();
             
-            if (!empresas || empresas.length === 0) {
-                tabla.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
-                            No se encontraron empresas
-                        </td>
-                    </tr>
-                `;
+            if (!valor) {
+                cargarEmpresas();
                 return;
             }
-            
-            let html = '';
-            empresas.forEach((empresa, index) => {
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${empresa.id}</td>
-                        <td>${empresa.nombre}</td>
-                        <td>${empresa.ruc}</td>
-                        <td>${empresa.direccion}</td>
-                        <td>${empresa.telefono}</td>
-                        <td>${empresa.email}</td>
-                    </tr>
+
+            try {
+                // Mostrar loading
+                document.getElementById('content').innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Buscando...</span>
+                        </div>
+                        <p class="mt-3">Buscando empresas...</p>
+                    </div>
                 `;
-            });
-            
-            tabla.innerHTML = html;
-        }
 
-        function limpiarResultados() {
-            document.getElementById('tablaEmpresas').innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
-                        Realice una consulta para ver los resultados
-                    </td>
-                </tr>
-            `;
-        }
+                const response = await fetch(`controllers/EmpresaController.php?action=search&campo=nombre&valor=${encodeURIComponent(valor)}`, { 
+                    credentials: 'same-origin' 
+                });
+                const result = await response.json();
+                
+                let html = `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-building me-2"></i>Empresas</h2>
+                        <div class="input-group" style="max-width: 400px;">
+                            <input type="text" class="form-control" id="buscarEmpresa" value="${valor}" placeholder="Buscar por nombre, RUC, email...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="buscarEmpresas()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" type="button" onclick="cargarEmpresas()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    html += `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Se encontraron <strong>${result.total}</strong> empresa(s) con el término "${valor}"
+                        </div>
+                        <div class="row">
+                    `;
+                    
+                    result.data.forEach(empresa => {
+                        html += `
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card token-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                ${empresa.nombre || 'Sin nombre'}
+                                            </h5>
+                                        </div>
+                                        <p class="card-text">
+                                            <strong><i class="fas fa-id-card me-2 text-muted"></i>RUC:</strong> 
+                                            ${empresa.ruc || 'N/A'}<br>
+                                            <strong><i class="fas fa-map-marker-alt me-2 text-muted"></i>Dirección:</strong> 
+                                            ${empresa.direccion || 'N/A'}<br>
+                                            <strong><i class="fas fa-phone me-2 text-muted"></i>Teléfono:</strong> 
+                                            ${empresa.telefono || 'N/A'}<br>
+                                            <strong><i class="fas fa-envelope me-2 text-muted"></i>Email:</strong> 
+                                            ${empresa.email || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                } else {
+                    html += `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-search me-2"></i>
+                            No se encontraron empresas con el término "${valor}"
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('content').innerHTML = html;
 
-        function probarConexion() {
-            actualizarConfiguracion();
-            
-            if (!apiUrl || !apiToken) {
-                showAlert('Por favor, completa la URL y el token de la API', 'warning');
-                return;
+                // Agregar evento Enter en el campo de búsqueda
+                const buscarInput = document.getElementById('buscarEmpresa');
+                if (buscarInput) {
+                    buscarInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            buscarEmpresas();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error buscando empresas:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al buscar empresas. Por favor, intenta nuevamente.
+                    </div>
+                `;
             }
-            
-            // Simulación de prueba de conexión
-            showAlert('Probando conexión...', 'info');
-            
-            setTimeout(() => {
-                // En una implementación real, aquí verificarías la conexión a la API
-                showAlert('Conexión exitosa a la API', 'success');
-            }, 1000);
-
         }
 
         async function logout() {
