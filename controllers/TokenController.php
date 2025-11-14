@@ -81,7 +81,11 @@ class TokenController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = json_decode(file_get_contents("php://input"), true);
 
-            if (!empty($data['id_client_api']) && !empty($data['token'])) {
+            if (!empty($data['id_client_api'])) {
+                // Si no se envía token, generar uno seguro
+                if (empty($data['token'])) {
+                    $data['token'] = TokenModel::generateToken(64);
+                }
 
                 // Verificar si el token ya existe
                 if ($this->tokenModel->tokenExiste($data['token'])) {
@@ -92,17 +96,32 @@ class TokenController {
                     return;
                 }
 
-                $tokenId = $this->tokenModel->crearToken(
+                // atributos opcionales
+                $nombre = $data['nombre'] ?? null;
+                $descripcion = $data['descripcion'] ?? null;
+                $expires_at = $data['expires_at'] ?? null; // formato YYYY-MM-DD HH:MM:SS o null
+
+                $auth_url = $data['auth_url'] ?? null;
+
+                $tokenId = $this->tokenModel->crearTokenConMeta(
                     $data['id_client_api'],
                     $data['token'],
-                    $_SESSION['user_id']
+                    $_SESSION['user_id'],
+                    $nombre,
+                    $descripcion,
+                    $auth_url,
+                    $expires_at
                 );
 
                 if ($tokenId) {
+                    // Construir URL de autenticación con token
+                    $authUrl = BASE_URL . "?token=" . urlencode($data['token']);
                     echo json_encode([
                         "success" => true,
                         "message" => "Token creado correctamente",
-                        "id" => $tokenId
+                        "id" => $tokenId,
+                        "token" => $data['token'],
+                        "auth_url" => $authUrl
                     ]);
                 } else {
                     echo json_encode([
@@ -113,10 +132,22 @@ class TokenController {
             } else {
                 echo json_encode([
                     "success" => false,
-                    "message" => "Datos incompletos"
+                    "message" => "Datos incompletos: se requiere id_client_api"
                 ]);
             }
         }
+    }
+
+    public function search() {
+        Config::requireAuth();
+        $q = $_GET['q'] ?? '';
+        if (empty($q)) {
+            echo json_encode(["success" => false, "message" => "Parámetro q vacío"]);
+            return;
+        }
+
+        $results = $this->tokenModel->searchTokens($q);
+        echo json_encode(["success" => true, "data" => $results]);
     }
 
     public function deleteToken($id) {
@@ -187,6 +218,9 @@ switch($action) {
         break;
     case 'stats':
         $tokenController->getEstadisticas();
+        break;
+    case 'search':
+        $tokenController->search();
         break;
     default:
         echo json_encode(["success" => false, "message" => "Acción no válida"]);

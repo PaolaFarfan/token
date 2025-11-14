@@ -59,6 +59,17 @@ if (!Config::isAuthenticated()) {
             padding: 2px 5px;
             border-radius: 3px;
         }
+        .api-config-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn-api {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -82,6 +93,12 @@ if (!Config::isAuthenticated()) {
                             <a class="nav-link" href="#" onclick="cargarGestionTokens(); return false;">
                                 <i class="fas fa-key me-2"></i>
                                 Gestión de Tokens
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="cargarConsultarAPI(); return false;">
+                                <i class="fas fa-exchange-alt me-2"></i>
+                                Consultar API
                             </a>
                         </li>
                         <li class="nav-item">
@@ -212,6 +229,11 @@ if (!Config::isAuthenticated()) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Variables globales para configuración de API
+        let apiUrl = 'http://localhost:8888/api_empresas/';
+        let apiToken = 'tok_e2356634bb700782b9e4588bb8b6e526';
+        let consultaTipo = 'Listar todas las empresas';
+
         // Cargar dashboard al iniciar
         document.addEventListener('DOMContentLoaded', function() {
             cargarDashboard();
@@ -279,9 +301,9 @@ if (!Config::isAuthenticated()) {
                         </div>
                         <div class="col-md-3">
                             <div class="stats-card text-center">
-                                <i class="fas fa-user fa-2x text-info mb-3"></i>
-                                <h3><?php echo $_SESSION['nombre']; ?></h3>
-                                <p class="text-muted">Usuario Actual</p>
+                                <i class="fas fa-exchange-alt fa-2x text-info mb-3"></i>
+                                <h3>API Empresas</h3>
+                                <p class="text-muted">Consultar API</p>
                             </div>
                         </div>
                     </div>
@@ -348,6 +370,77 @@ if (!Config::isAuthenticated()) {
                 console.error('Error cargando tokens:', error);
                 document.getElementById('content').innerHTML = '<div class="alert alert-danger">Error al cargar tokens</div>';
             }
+        }
+
+        function cargarConsultarAPI() {
+            document.getElementById('content').innerHTML = `
+                <div class="row">
+                   
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="api-config-card">
+                            <h5 class="mb-3">Configuración de la API</h5>
+                            <div class="mb-3">
+                                <label for="apiUrl" class="form-label">URL de la API:</label>
+                                <input type="text" class="form-control" id="apiUrl" value="${apiUrl}" placeholder="Asegúrate de que la URL termine con /">
+                            </div>
+                            <div class="mb-3">
+                                <label for="apiToken" class="form-label">Token de autenticación:</label>
+                                <input type="text" class="form-control" id="apiToken" value="${apiToken}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="consultaTipo" class="form-label">Tipo de consulta:</label>
+                                <select class="form-control" id="consultaTipo">
+                                    <option value="Listar todas las empresas" ${consultaTipo === 'Listar todas las empresas' ? 'selected' : ''}>Listar todas las empresas</option>
+                                    <option value="Buscar por ID" ${consultaTipo === 'Buscar por ID' ? 'selected' : ''}>Buscar por ID</option>
+                                    <option value="Buscar por RUC" ${consultaTipo === 'Buscar por RUC' ? 'selected' : ''}>Buscar por RUC</option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-wrap">
+                                <button class="btn btn-primary btn-api" onclick="consultarEmpresas()">
+                                    <i class="fas fa-search me-2"></i>Consultar Empresas
+                                </button>
+                                <button class="btn btn-secondary btn-api" onclick="limpiarResultados()">
+                                    <i class="fas fa-broom me-2"></i>Limpiar Resultados
+                                </button>
+                                <button class="btn btn-info btn-api" onclick="probarConexion()">
+                                    <i class="fas fa-plug me-2"></i>Probar Conexión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="api-config-card">
+                            <h5 class="mb-3">Resultados de la Consulta</h5>
+                            <div id="resultadosApi" class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Nro</th>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>RUC</th>
+                                            <th>Dirección</th>
+                                            <th>Teléfono</th>
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaEmpresas">
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                Realice una consulta para ver los resultados
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function mostrarModalNuevoToken() {
@@ -501,7 +594,7 @@ if (!Config::isAuthenticated()) {
         function cargarUsuarios() {
             document.getElementById('content').innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Gestión de Usuarios</h2>
+                    <h2>Gestion de Usuarios</h2>
                     <button class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Nuevo Usuario
                     </button>
@@ -510,6 +603,103 @@ if (!Config::isAuthenticated()) {
                     Esta funcionalidad estará disponible pronto. Solo para administradores.
                 </div>
             `;
+        }
+
+        // Funciones para la consulta de API
+        function actualizarConfiguracion() {
+            apiUrl = document.getElementById('apiUrl').value;
+            apiToken = document.getElementById('apiToken').value;
+            consultaTipo = document.getElementById('consultaTipo').value;
+        }
+
+        async function consultarEmpresas() {
+            actualizarConfiguracion();
+            
+            if (!apiUrl || !apiToken) {
+                showAlert('Por favor, completa la URL y el token de la API', 'warning');
+                return;
+            }
+            
+            try {
+                showAlert('Consultando empresas...', 'info');
+                
+                // Simulación de consulta a la API
+                // En una implementación real, aquí harías la llamada a la API
+                setTimeout(() => {
+                    // Datos de ejemplo para simular la respuesta
+                    const empresas = [
+                        { id: 1, nombre: 'Empresa Ejemplo 1', ruc: '20100066601', direccion: 'Av. Ejemplo 123', telefono: '987654321', email: 'contacto@empresa1.com' },
+                        { id: 2, nombre: 'Empresa Ejemplo 2', ruc: '20100066602', direccion: 'Av. Demo 456', telefono: '987654322', email: 'info@empresa2.com' },
+                        { id: 3, nombre: 'Empresa Ejemplo 3', ruc: '20100066603', direccion: 'Calle Test 789', telefono: '987654323', email: 'ventas@empresa3.com' }
+                    ];
+                    
+                    mostrarResultados(empresas);
+                    showAlert('Consulta completada correctamente', 'success');
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error consultando API:', error);
+                showAlert('Error al consultar la API: ' + error.message, 'danger');
+            }
+        }
+
+        function mostrarResultados(empresas) {
+            const tabla = document.getElementById('tablaEmpresas');
+            
+            if (!empresas || empresas.length === 0) {
+                tabla.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No se encontraron empresas
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            empresas.forEach((empresa, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${empresa.id}</td>
+                        <td>${empresa.nombre}</td>
+                        <td>${empresa.ruc}</td>
+                        <td>${empresa.direccion}</td>
+                        <td>${empresa.telefono}</td>
+                        <td>${empresa.email}</td>
+                    </tr>
+                `;
+            });
+            
+            tabla.innerHTML = html;
+        }
+
+        function limpiarResultados() {
+            document.getElementById('tablaEmpresas').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Realice una consulta para ver los resultados
+                    </td>
+                </tr>
+            `;
+        }
+
+        function probarConexion() {
+            actualizarConfiguracion();
+            
+            if (!apiUrl || !apiToken) {
+                showAlert('Por favor, completa la URL y el token de la API', 'warning');
+                return;
+            }
+            
+            // Simulación de prueba de conexión
+            showAlert('Probando conexión...', 'info');
+            
+            setTimeout(() => {
+                // En una implementación real, aquí verificarías la conexión a la API
+                showAlert('Conexión exitosa a la API', 'success');
+            }, 1000);
         }
 
         async function logout() {

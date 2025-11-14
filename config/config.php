@@ -51,11 +51,56 @@ class Config {
     }
     
     public static function requireAuth() {
-        if (!self::isAuthenticated()) {
-            http_response_code(401);
-            echo json_encode(array("success" => false, "message" => "No autenticado"));
-            exit();
+        if (self::isAuthenticated()) {
+            return true;
         }
+
+        // Intentar autenticación por token (Authorization: Bearer <token> o ?token=...)
+        $token = null;
+        // Cabecera Authorization
+        $headers = null;
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+        }
+        if ($headers && isset($headers['Authorization'])) {
+            if (preg_match('/Bearer\s+(.*)$/i', $headers['Authorization'], $matches)) {
+                $token = trim($matches[1]);
+            }
+        } elseif ($headers && isset($headers['authorization'])) {
+            if (preg_match('/Bearer\s+(.*)$/i', $headers['authorization'], $matches)) {
+                $token = trim($matches[1]);
+            }
+        }
+
+        // Parámetro URL
+        if (empty($token) && isset($_GET['token'])) {
+            $token = $_GET['token'];
+        }
+        if (empty($token) && isset($_GET['access_token'])) {
+            $token = $_GET['access_token'];
+        }
+
+        if (!empty($token)) {
+            // Validar token en la BD
+            require_once __DIR__ . "/../models/TokenModel.php";
+            try {
+                $tm = new TokenModel();
+                $tokenRow = $tm->getByToken($token);
+                if ($tokenRow && intval($tokenRow['estado']) === 1) {
+                    // Autenticar como el usuario propietario del token para esta petición
+                    $_SESSION['user_id'] = $tokenRow['usuario_id'];
+                    // opcional: cargar info de usuario mínima
+                    $_SESSION['auth_via_token'] = true;
+                    return true;
+                }
+            } catch (Exception $e) {
+                // no hacer crash, seguir al 401
+            }
+        }
+
+        http_response_code(401);
+        echo json_encode(array("success" => false, "message" => "No autenticado"));
+        exit();
     }
     
     public static function requireAdmin() {
